@@ -1,3 +1,6 @@
+from kivy.config import Config
+Config.set('graphics', 'width', '900')
+Config.set('graphics', 'height', '400')
 from kivy.app import App
 from kivy.uix.widget import Widget
 
@@ -19,6 +22,9 @@ class MainWidget(Widget):
     horizontal_lines = []
     current_offset_y = 0
     SPEED = 4
+
+    current_offset_x = 0
+    SPEED_X = 3
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -56,7 +62,7 @@ class MainWidget(Widget):
         spacing = self.width * self.V_LINES_SPACING
         # self.line.points = [self.perspective_point_x, 0, self.perspective_point_x, self.perspective_point_y]
         for line in self.vertical_lines:
-            line_x = int(central_line_x + offset*spacing)
+            line_x = int(central_line_x + offset*spacing + self.current_offset_x)
             x1, y1 = self.transform(line_x, 0)
             x2, y2 = self.transform(line_x, self.height)
             line.points = [x1, y1, x2, y2]
@@ -74,8 +80,8 @@ class MainWidget(Widget):
         spacing = self.width * self.V_LINES_SPACING
         offset = -int(self.V_NB_LINES/2) + 0.5
 
-        x_min = central_line_x + offset*spacing
-        x_max = central_line_x - offset*spacing
+        x_min = central_line_x + offset*spacing + self.current_offset_x
+        x_max = central_line_x - offset*spacing + self.current_offset_x
         spacing_y = self.H_LINES_SPACING*self.height
         for i, line in enumerate(self.horizontal_lines):
             line_y = i*spacing_y-self.current_offset_y
@@ -104,7 +110,7 @@ class MainWidget(Widget):
         return int(tr_x), int(tr_y)
 
     def update(self, dt):
-        time_factor = 1 * 60
+        time_factor = dt * 60
         self.perspective_point_x = self.width / 2
         self.perspective_point_y = self.height * 0.75
         self.update_vertical_lines()
@@ -113,7 +119,7 @@ class MainWidget(Widget):
         spacing_y = self.H_LINES_SPACING*self.height
         if self.current_offset_y >= spacing_y:
             self.current_offset_y -= spacing_y
-
+        self.current_offset_x += self.SPEED_X * time_factor
 
 class GalaxyApp(App):
     pass
